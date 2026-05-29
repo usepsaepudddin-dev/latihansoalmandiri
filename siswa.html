@@ -50,6 +50,36 @@
         .modal-form label { font-size: 12px; font-weight: 700; color: #475569; }
         .modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
         .modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
+    /* KODE KHUSUS AGAR TAMPILAN RAPI DI LAYAR HP */
+@media screen and (max-width: 768px) {
+    .app-container {
+        flex-direction: column !important; /* Susun sidebar dan konten atas-bawah, bukan kiri-kanan */
+    }
+
+    .sidebar {
+        width: 100% !important;   /* Lebar sidebar penuhi layar HP */
+        height: auto !important;   /* Tinggi sidebar otomatis mengikuti isi */
+        position: relative !important;
+        padding: 15px !important;
+    }
+
+    .sidebar-scrollable-content {
+        max-height: 200px !important; /* Batasi tinggi menu pertemuan di HP agar tidak terlalu panjang */
+        overflow-y: auto !important;  /* Tetap aktifkan scroll di dalam HP */
+    }
+
+    .main-content {
+        width: 100% !important;   /* Konten utama/tabel soal penuhi layar bawahnya */
+        padding: 10px !important;
+    }
+    
+    .content-header {
+        flex-direction: column !important; /* Header info siswa susun ke bawah agar tidak terpotong */
+        gap: 8px !important;
+    }
+}
+
+    
     </style>
 </head>
 <body>
