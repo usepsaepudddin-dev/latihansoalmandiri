@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrument Penilaian - Premium Admin Dashboard</title>
+    
+    <!-- 1. Alamat Lengkap Library Ikon Font Awesome Resmi -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- 2. Alamat Lengkap Google Fonts Resmi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    
+    <!-- 3. Alamat Lengkap Library Supabase JS Resmi -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.106.2/dist/umd/supabase.min.js"></script>
+
+    <!-- 3. CDN html2pdf Standar yang Stabil Tanpa Blokir Keamanan -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.12.1/html2pdf.bundle.min.js" integrity="sha512-D25Z8/1q2z65ZpJ3NzY6XiPZfwjhbv34OTQHDIZd+KPK+uWCovGt+fMkSzW8ArzCMFUgZt6Cdu7qoXNuy6a2GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); padding: 30px; min-height: 100vh; }
+        
+        .rekap-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 35px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15);
+        }
+
+        .rekap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .rekap-title h2 { color: #1e3a8a; font-weight: 800; font-size: 24px; }
+        .rekap-title p { color: #64748b; font-size: 14px; margin-top: 4px; }
+        
+        .header-buttons { display: flex; gap: 10px; }
+
+        .btn-kembali {
+            padding: 10px 18px; background: #f1f5f9; color: #475569;
+            text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-kembali:hover { background: #e2e8f0; color: #1e293b; }
+
+        .btn-pdf {
+            padding: 10px 18px; background: #ef4444; color: white;
+            border: none; border-radius: 12px; font-weight: 700; font-size: 13px;
+            display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-pdf:hover { background: #dc2626; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+
+        .filter-section {
+            background: #f8fafc; padding: 18px 20px; border-radius: 16px;
+            border: 1px solid #e2e8f0; margin-bottom: 25px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;
+            align-items: center;
+        }
+        .filter-box { display: flex; align-items: center; gap: 10px; }
+        .filter-box label { font-size: 13px; font-weight: 700; color: #334155; white-space: nowrap; }
+        .filter-box select { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; outline: none; font-size: 13.5px; background: #ffffff; width: 100%; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; margin-top: 10px; }
+        th { background: #312e81; color: #ffffff; padding: 14px; font-weight: 700; border: 1px solid #312e81; }
+        th:first-child { border-top-left-radius: 12px; }
+        th:last-child { border-top-right-radius: 12px; }
+        td { padding: 12px 14px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+        tr:hover td { background-color: #f8fafc; }
+
+        .badge-skor { padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; display: inline-block; }
+        .skor-lulus { background: #dcfce7; color: #15803d; }
+        .skor-remedi { background: #fee2e2; color: #b91c1c; }
+
+        .loader-box { text-align: center; padding: 40px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div class="rekap-container" id="areaCetakPdf">
+        <header class="rekap-header">
+            <div class="rekap-title">
+                <h2><i class="fa-solid fa-chart-user" style="color: #4f46e5; margin-right: 8px;"></i> Rekapitulasi Nilai Siswa</h2>
+                <p>Pantau hasil nilai latihan mandiri berdasarkan filter kelas secara real-time</p>
+            </div>
+            <!-- Menyembunyikan tombol navigasi saat proses ekspor PDF berjalan -->
+            <div class="header-buttons" data-html2canvas-ignore="true">
+                <button onclick="unduhRekapHasilPdf()" class="btn-pdf">
+                    <i class="fa-solid fa-file-pdf"></i> Unduh PDF Laporan
+                </button>
+                <a href="dashboard.html" class="btn-kembali">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+            </div>
+        </header>
+
+        <div class="filter-section" data-html2canvas-ignore="true">
+            <div class="filter-box">
+                <i class="fa-solid fa-filter" style="color: #4f46e5;"></i>
+                <label>Filter Kelas:</label>
+                <select id="selectFilterKelas" onchange="jalankanFilterGanda()">
+                    <option value="SEMUA">-- Semua Kelas --</option>
+                </select>
+            </div>
+            <div class="filter-box">
+                <i class="fa-solid fa-book" style="color: #06b6d4;"></i>
+                <label>Filter Pertemuan:</label>
+                <select id="selectFilterMateri" onchange="jalankanFilterGanda()">
+                    <option value="SEMUA">-- Semua Pertemuan --</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama Siswa</th>
+                        <th style="width: 140px;">Kelas</th>
+                        <th>Materi Pertemuan</th>
+                        <th style="width: 100px; text-align: center;">Benar</th>
+                        <th style="width: 100px; text-align: center;">Salah/Kosong</th>
+                        <th style="width: 120px; text-align: center;">Skor Akhir</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelBodyNilai"></tbody>
+            </table>
+        </div>
+    </div>
+<script>
+    // 1. KONEKSI KE DATABASE CLOUD SUPABASE
+    const SUPABASE_URL = "https://ytdjzzcosnwqcqzetbph.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_AjyOuS5KjBLsSNLSSVSGvA_Ig0ogX93"; 
+    const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    window.semuaRiwayatNilai = [];
+
+    // 2. AMBIL DATA RIWAYAT NILAI LANGSUNG SAAT HALAMAN DIBUKA GURU
+    async function muatDataRekapNilai() {
+        const tbody = document.getElementById('tabelBodyNilai');
+        tbody.innerHTML = `<tr><td colspan="6" class="loader-box"><i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke cloud, mengambil data nilai...</td></tr>`;
+
+        try {
+            const { data: listNilai, error } = await clientSupabase
+                .from('riwayat_nilai')
+                .select('*')
+                .order('waktu_pengerjaan', { ascending: false });
+
+            if (error) throw error;
+
+            window.semuaRiwayatNilai = listNilai || [];
+
+            // Mengisi menu dropdown filter secara otomatis sesuai isi database
+            isiDropdownFilterGanda(window.semuaRiwayatNilai);
+            
+            // Render data utuh pertama kali ke tabel
+            renderDataKeTabel(window.semuaRiwayatNilai);
+
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Gagal mengambil data: ${err.message}</td></tr>`;
+        }
+    }
+
+    // 3. FUNGSI UNTUK GENERATE PILIHAN KELAS DAN PERTEMUAN SECARA DINAMIS
+    function isiDropdownFilterGanda(data) {
+        const selectKelas = document.getElementById('selectFilterKelas');
+        const selectMateri = document.getElementById('selectFilterMateri');
+        
+        // Kumpulkan data unik dari database
+        const listKelasUnik = [...new Set(data.map(item => item.kelas?.toUpperCase().trim()))].sort();
+        const listMateriUnik = [...new Set(data.map(item => item.pertemuan?.trim()))].sort();
+        
+        // Reset Dropdown Kelas
+        selectKelas.innerHTML = '<option value="SEMUA">-- Semua Kelas --</option>';
+        listKelasUnik.forEach(kelas => {
+            if(kelas) {
+                const opsi = document.createElement('option');
+                opsi.value = kelas;
+                opsi.innerText = `Kelas ${kelas}`;
+                selectKelas.appendChild(opsi);
+            }
+        });
+
+        // Reset Dropdown Pertemuan/Materi
+        selectMateri.innerHTML = '<option value="SEMUA">-- Semua Pertemuan --</option>';
+        listMateriUnik.forEach(materi => {
+            if(materi) {
+                const opsi = document.createElement('option');
+                opsi.value = materi.toUpperCase();
+                opsi.innerText = materi;
+                selectMateri.appendChild(opsi);
+            }
+        });
+    }
+
+    // 4. MESIN FILTER GANDA (MENYARING KELAS DAN PERTEMUAN SEKALIGUS)
+    function jalankanFilterGanda() {
+        const kelasTerpilih = document.getElementById('selectFilterKelas').value;
+        const materiTerpilih = document.getElementById('selectFilterMateri').value;
+        
+        let dataHasilSaring = window.semuaRiwayatNilai;
+
+        // Saring berdasarkan Kelas jika tidak memilih "SEMUA"
+        if (kelasTerpilih !== "SEMUA") {
+            dataHasilSaring = dataHasilSaring.filter(item => 
+                (item.kelas || "").toUpperCase().trim() === kelasTerpilih
+            );
+        }
+
+        // Saring berdasarkan Pertemuan jika tidak memilih "SEMUA"
+        if (materiTerpilih !== "SEMUA") {
+            dataHasilSaring = dataHasilSaring.filter(item => 
+                (item.pertemuan || "").toUpperCase().trim() === materiTerpilih
+            );
+        }
+
+        // Cetak data hasil kombinasi filter ke tabel
+        renderDataKeTabel(dataHasilSaring);
+    }
+
+    // 5. FUNGSI MENCETAK DATA NILAI KE TABEL HTML
+    function renderDataKeTabel(data) {
+        const tbody = document.getElementById('tabelBodyNilai');
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fa-solid fa-folder-open"></i> Tidak ada riwayat nilai siswa yang cocok dengan filter.</td></tr>`;
+            return;
+        }
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            const kelasBadge = row.skor >= 70 ? 'skor-lulus' : 'skor-remedi';
+            
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #1e293b;"><i class="fa-solid fa-circle-user" style="color:#cbd5e1; margin-right:6px;"></i> ${row.nama_siswa}</td>
+                <td><span style="font-weight:600; color:#475569;">${row.kelas}</span></td>
+                <td style="color:#475569;">${row.pertemuan || '-'}</td>
+                <td style="text-align: center; color: #16a34a; font-weight:700;">${row.benar || 0}</td>
+                <td style="text-align: center; color: #dc2626; font-weight:700;">${row.salah_atau_kosong || 0}</td>
+                <td style="text-align: center;">
+                    <span class="badge-skor ${kelasBadge}">${row.skor || 0}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // 6. FUNGSI GENERATE DAN UNDUH PDF RESMI
+    function unduhRekapHasilPdf() {
+        const element = document.getElementById('areaCetakPdf');
+        
+        // Mengambil teks filter untuk penamaan file PDF secara dinamis
+        const kelasFilter = document.getElementById('selectFilterKelas').value;
+        const materiFilter = document.getElementById('selectFilterMateri').value;
+        const namaFile = `Laporan_Nilai_Kelas_${kelasFilter}_Materi_${materiFilter.substring(0,10).trim()}.pdf`;
+
+        // Pengaturan Layout Dokumen PDF agar Rapi di Kertas A4 (Landscape)
+        const pilihanKonfigurasi = {
+            margin:       10, 
+            filename:     namaFile,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } 
+        };
+
+        // Jalankan perintah ekspor PDF menggunakan library html2pdf
+        html2pdf().set(pilihanKonfigurasi).from(element).save();
+    }
+
+    // Jalankan pemuatan data otomatis dari cloud saat halaman diakses
+    document.addEventListener("DOMContentLoaded", muatDataRekapNilai);
+</script>
+</body>
+</html>
