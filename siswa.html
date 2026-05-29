@@ -51,51 +51,47 @@
         .modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
         .modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
 
-/* KODE FIX: AMAN DI HP DAN LAPTOP (BISA DIGESER HORIZONTAL DI HP) */
+/* KODE FIX: MENGHAPUS MENTOK DI HP, BISA DIGESER PENUH */
 
-/* 1. Aturan Dasar (Berlaku di Laptop & HP) */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    overflow-x: auto; /* Izinkan scroll ke kanan jika konten melebihi layar */
+    overflow-x: auto !important; /* Membuka kunci geser kanan-kiri */
+    overflow-y: auto;
 }
 
 .app-container {
-    display: flex;
-    flex-direction: row; /* Wajib berjejer kiri-kanan */
+    display: flex !important;
+    flex-direction: row !important;
     min-height: 100vh;
-    width: max-content;  /* Lebar wadah otomatis mengikuti total isi di dalamnya */
-    min-width: 100vw;
+    /* RUMUS KUNCI: Menjumlahkan lebar asli sidebar + lebar layar HP penuh */
+    width: calc(240px + 100vw) !important; 
 }
 
-/* 2. Ukuran Panel Biru (Dibuat Lebih Ramping) */
 .sidebar {
-    width: 240px;        /* Ukuran pas untuk menu di HP agar tidak terlalu dominan */
-    flex-shrink: 0;      /* Kunci ukuran, tidak boleh menciut sama sekali */
-    background-color: #1e3a8a; /* Sesuaikan warna biru Anda */
-    box-sizing: border-box;
+    width: 240px !important; /* Lebar menu biru tetap dikunci ramping */
+    flex-shrink: 0 !important;
+    min-height: 100vh;
 }
 
-/* 3. Ukuran Panel Putih Tempat Soal (Fleksibel & Luas) */
 .main-content {
-    width: calc(100vw - 40px); /* Di HP: Otomatis selebar layar HP dikurangi sedikit space */
-    min-width: 320px;          /* Batas minimal lebar agar teks soal tidak dempet */
-    flex-shrink: 0;            /* Kunci agar panel putih tidak terjepit oleh panel biru */
+    /* RUMUS KUNCI: Lembar putih dijamin mendapat jatah selebar layar HP penuh */
+    width: 100vw !important; 
+    flex-shrink: 0 !important;
     padding: 20px;
     box-sizing: border-box;
-    background-color: #ffffff;
 }
 
-/* 4. Sentuhan Khusus untuk Layar Laptop */
+/* Penyesuaian Otomatis Saat Dibuka di Laptop (Layar Besar) */
 @media screen and (min-width: 1024px) {
     .app-container {
-        width: 100%; /* Di laptop, hilangkan scroll horizontal karena layar sudah luas */
+        width: 100% !important; /* Di laptop tidak perlu digeser karena layar luas */
     }
     .main-content {
-        width: auto;
-        flex-grow: 1; /* Di laptop, panel putih otomatis menghabiskan sisa layar */
+        width: auto !important;
+        flex-grow: 1 !important;
     }
 }
 
