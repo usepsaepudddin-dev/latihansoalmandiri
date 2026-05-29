@@ -51,44 +51,51 @@
         .modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
         .modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
 
-/* KODE REVISI: PANEL BIRU LEBIH RAMPING & AREA SOAL LEBIH LUAS */
+/* KODE FIX: AMAN DI HP DAN LAPTOP (BISA DIGESER HORIZONTAL DI HP) */
+
+/* 1. Aturan Dasar (Berlaku di Laptop & HP) */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: auto; /* Izinkan scroll ke kanan jika konten melebihi layar */
+}
 
 .app-container {
     display: flex;
-    flex-direction: row; 
+    flex-direction: row; /* Wajib berjejer kiri-kanan */
     min-height: 100vh;
-    width: 100%;
+    width: max-content;  /* Lebar wadah otomatis mengikuti total isi di dalamnya */
+    min-width: 100vw;
 }
 
-/* 1. Panel Biru Diperkecil */
+/* 2. Ukuran Panel Biru (Dibuat Lebih Ramping) */
 .sidebar {
-    width: 220px;       /* Dikurangi dari 280px menjadi 220px agar lebih ramping */
-    flex-shrink: 0;     /* Mengunci agar panel biru tidak menjepit menu di dalamnya */
-    background-color: #007bff; 
-}
-
-/* 2. Panel Putih Maksimal untuk Soal */
-.main-content {
-    flex-grow: 1;       /* Otomatis melebar menghabiskan seluruh sisa layar */
-    width: 0;           /* Trik CSS agar teks soal panjang tidak merusak/mendorong layout */
-    padding: 24px;      /* Ruang dalam sedikit diperlebar agar membaca soal lebih nyaman */
+    width: 240px;        /* Ukuran pas untuk menu di HP agar tidak terlalu dominan */
+    flex-shrink: 0;      /* Kunci ukuran, tidak boleh menciut sama sekali */
+    background-color: #1e3a8a; /* Sesuaikan warna biru Anda */
     box-sizing: border-box;
 }
 
-/* 3. Penyesuaian Otomatis di Layar HP */
-@media screen and (max-width: 768px) {
+/* 3. Ukuran Panel Putih Tempat Soal (Fleksibel & Luas) */
+.main-content {
+    width: calc(100vw - 40px); /* Di HP: Otomatis selebar layar HP dikurangi sedikit space */
+    min-width: 320px;          /* Batas minimal lebar agar teks soal tidak dempet */
+    flex-shrink: 0;            /* Kunci agar panel putih tidak terjepit oleh panel biru */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+/* 4. Sentuhan Khusus untuk Layar Laptop */
+@media screen and (min-width: 1024px) {
     .app-container {
-        flex-direction: column; 
+        width: 100%; /* Di laptop, hilangkan scroll horizontal karena layar sudah luas */
     }
-
-    .sidebar {
-        width: 100%;    
-        height: auto;   
-    }
-
     .main-content {
-        width: 100%;    
-        padding: 16px;  /* Jarak teks ke tepi layar HP sedikit dirapatkan agar hemat ruang */
+        width: auto;
+        flex-grow: 1; /* Di laptop, panel putih otomatis menghabiskan sisa layar */
     }
 }
 
