@@ -21,79 +21,105 @@
     <title>Portal Siswa</title>
     </head>
 
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); padding: 20px; }
-        .app-container { display: flex; width: 100%; max-width: 1240px; height: 88vh; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
-        .sidebar { width: 260px; background: linear-gradient(180deg, #312e81 0%, #4338ca 100%); padding: 30px 18px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
-        .sidebar-brand { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-        .sidebar-brand i { font-size: 36px; color: #38bdf8; margin-bottom: 12px; display: block; }
-        .sidebar h2 { font-size: 15px; font-weight: 800; color: #ffffff; line-height: 1.4; }
-        .menu-item { color: #e0e7ff; text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(255, 255, 255, 0.06); }
-        .sub-menu-title { font-weight: 700; color: #93c5fd; margin-top: 15px; padding-left: 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;}
-        .sub-menu-list { padding-left: 4px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; overflow-y: auto; }
-        .sub-item { color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 500; padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
-        .sub-item:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.1); }
-        .main-content { flex: 1; display: flex; flex-direction: column; background: #f8fafc; overflow: hidden; }
-        .content-header { height: 80px; background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: space-around; padding: 0 20px; font-size: 13px; font-weight: 600; color: #ffffff; flex-shrink: 0; }
-        .header-field { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.18); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .content-body { flex: 1; padding: 25px; display: flex; overflow: hidden; }
-        .inner-box { flex: 1; border: 1px solid #e2e8f0; border-radius: 20px; padding: 25px; background-color: #ffffff; overflow-y: auto; }
-        .placeholder-content { text-align: center; margin-top: 15vh; color: #94a3b8; }
-        .placeholder-content i { font-size: 54px; color: #cbd5e1; margin-bottom: 15px; }
-        .loader-box { text-align: center; padding: 40px; color: #64748b; font-size: 15px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .modal-box { background: #ffffff; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
-        .modal-box h3 { margin-bottom: 8px; color: #1e3a8a; font-weight: 800; }
-        .modal-box p { font-size: 13px; color: #64748b; margin-bottom: 20px; }
-        .modal-form { display: flex; flex-direction: column; gap: 14px; text-align: left; }
-        .modal-form label { font-size: 12px; font-weight: 700; color: #475569; }
-        .modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
-        .modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
+<style>
+/* 1. Reset Dasar & Aturan Global */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+}
 
-/* KODE FIX: MENGHAPUS MENTOK DI HP, BISA DIGESER PENUH */
-
+/* FIX UTAMA: Menghilangkan flex center pada body agar halaman bisa digeser bebas di HP */
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    overflow-x: auto !important; /* Membuka kunci geser kanan-kiri */
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    overflow-x: auto !important; 
     overflow-y: auto;
 }
 
-.app-container {
-    display: flex !important;
-    flex-direction: row !important;
+/* 2. Struktur Wadah Utama */
+.app-container { 
+    display: flex; 
+    width: calc(260px + 100vw); /* Gabungan lebar sidebar + layar HP penuh */
     min-height: 100vh;
-    /* RUMUS KUNCI: Menjumlahkan lebar asli sidebar + lebar layar HP penuh */
-    width: calc(240px + 100vw) !important; 
+    background: #ffffff; 
+    overflow: visible; /* Diubah dari hidden menjadi visible agar konten tidak terpotong */
 }
 
-.sidebar {
-    width: 240px !important; /* Lebar menu biru tetap dikunci ramping */
-    flex-shrink: 0 !important;
+/* 3. Panel Biru (Sidebar) */
+.sidebar { 
+    width: 260px; 
+    background: linear-gradient(180deg, #312e81 0%, #4338ca 100%); 
+    padding: 30px 18px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    flex-shrink: 0; 
     min-height: 100vh;
 }
 
-.main-content {
-    /* RUMUS KUNCI: Lembar putih dijamin mendapat jatah selebar layar HP penuh */
-    width: 100vw !important; 
-    flex-shrink: 0 !important;
-    padding: 20px;
-    box-sizing: border-box;
+.sidebar-brand { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+.sidebar-brand i { font-size: 36px; color: #38bdf8; margin-bottom: 12px; display: block; }
+.sidebar h2 { font-size: 15px; font-weight: 800; color: #ffffff; line-height: 1.4; }
+.menu-item { color: #e0e7ff; text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(255, 255, 255, 0.06); }
+.sub-menu-title { font-weight: 700; color: #93c5fd; margin-top: 15px; padding-left: 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;}
+.sub-menu-list { padding-left: 4px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; overflow-y: auto; }
+.sub-item { color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 500; padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; gap: 8px; }
+.sub-item:hover { color: #ffffff; background-color: rgba(255, 255, 255, 0.1); }
+
+/* 4. Panel Putih (Tempat Soal) */
+.main-content { 
+    width: 100vw; /* Menjamin area soal selebar layar HP penuh */
+    flex-shrink: 0; 
+    display: flex; 
+    flex-direction: column; 
+    background: #f8fafc; 
 }
 
-/* Penyesuaian Otomatis Saat Dibuka di Laptop (Layar Besar) */
+.content-header { height: 80px; background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: space-around; padding: 0 20px; font-size: 13px; font-weight: 600; color: #ffffff; flex-shrink: 0; }
+.header-field { display: flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.18); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); }
+.content-body { flex: 1; padding: 25px; display: flex; }
+.inner-box { flex: 1; border: 1px solid #e2e8f0; border-radius: 20px; padding: 25px; background-color: #ffffff; overflow-y: auto; }
+
+/* Elements Lainnya */
+.placeholder-content { text-align: center; margin-top: 15vh; color: #94a3b8; }
+.placeholder-content i { font-size: 54px; color: #cbd5e1; margin-bottom: 15px; }
+.loader-box { text-align: center; padding: 40px; color: #64748b; font-size: 15px; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+.modal-box { background: #ffffff; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; }
+.modal-box h3 { margin-bottom: 8px; color: #1e3a8a; font-weight: 800; }
+.modal-box p { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+.modal-form { display: flex; flex-direction: column; gap: 14px; text-align: left; }
+.modal-form label { font-size: 12px; font-weight: 700; color: #475569; }
+.modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
+.modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
+
+/* 5. OTOMATIS RESPONSIF SAAT DI LAPTOP (Layar > 1024px) */
 @media screen and (min-width: 1024px) {
-    .app-container {
-        width: 100% !important; /* Di laptop tidak perlu digeser karena layar luas */
+    body { 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        padding: 20px; 
     }
-    .main-content {
-        width: auto !important;
-        flex-grow: 1 !important;
+    .app-container { 
+        width: 100%; 
+        max-width: 1240px; 
+        height: 88vh; 
+        border-radius: 24px; 
+        overflow: hidden; 
+        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); 
+    }
+    .main-content { 
+        width: auto;
+        flex: 1; 
     }
 }
+</style>
 
     
     </style>
