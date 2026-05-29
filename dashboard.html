@@ -55,33 +55,34 @@
         th { background: #e2e8f0; color: #334155; padding: 12px 10px; border: 1px solid #cbd5e1; font-weight: 700; }
         td { padding: 10px; border: 1px solid #e2e8f0; color: #334155; }
 
-                     /* KODE FIX: BEBAS SCROLL ATAS, BAWAH, KIRI, DAN KANAN (TAMPILAN VERSI DESKTOP DI HP) */
+           /* KODE FIX: BEBAS GESER KIRI-KANAN-ATAS-BAWAH TANPA TERKUNCI */
         @media screen and (max-width: 768px) {
             html, body {
-                overflow: auto !important; /* Izinkan browser melakukan scroll penuh */
+                overflow: auto !important; /* Bebaskan scroll bawaan browser */
                 width: auto !important;
                 height: auto !important;
             }
             .app-container {
                 display: flex !important;
-                flex-direction: row !important; /* Tetap pertahankan posisi kiri-kanan */
-                min-width: 1024px !important;    /* Paksa lebar halaman minimal seukuran layar laptop */
-                width: max-content !important;
-                height: 100vh !important;
-                overflow: visible !important;   /* Bebaskan agar tidak ada menu yang mengunci geseran */
+                flex-direction: row !important; /* Tetap bersanding kiri-kanan */
+                width: 1300px !important;       /* Buat kanvas lebar seukuran laptop */
+                height: auto !important;
+                min-height: 100vh !important;
+                overflow: visible !important;
             }
             .sidebar {
-                width: 260px !important;       /* Kunci lebar menu panel kiri */
+                width: 280px !important;        /* Ukuran menu biru */
                 flex-shrink: 0 !important;
                 height: 100vh !important;
-                position: sticky !important;    /* Menu kiri tetap diam saat di-scroll atas-bawah */
-                top: 0 !important;
+                position: relative !important;  /* LEPASKAN KUNCI! Biar bisa digeser hilang ke kiri */
+                top: auto !important;
+                left: auto !important;
             }
             .main-content {
-                flex: 1 !important;
-                min-width: 760px !important;    /* Berikan ruang luas untuk lembar soal */
-                height: 100vh !important;
-                overflow-y: auto !important;
+                width: 1020px !important;       /* Ruang lembar kerja putih menjadi sangat luas */
+                flex-shrink: 0 !important;
+                height: auto !important;
+                overflow: visible !important;
                 padding: 20px !important;
                 box-sizing: border-box;
             }
