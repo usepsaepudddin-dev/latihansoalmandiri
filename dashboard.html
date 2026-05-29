@@ -55,41 +55,46 @@
         th { background: #e2e8f0; color: #334155; padding: 12px 10px; border: 1px solid #cbd5e1; font-weight: 700; }
         td { padding: 10px; border: 1px solid #e2e8f0; color: #334155; }
 
-              /* KODE FIX: PANEL BIRU BISA TERDORONG KELUAR MELEWATI LAYAR HP */
-        @media screen and (max-width: 768px) {
-            html, body {
-                width: max-content !important;    /* Paksa browser mengikuti total lebar kertas */
-                min-width: 100vw !important;
-                overflow: auto !important;        /* Aktifkan geser bebas atas-bawah-kiri-kanan */
-                display: block !important;
-            }
-            .app-container {
-                display: flex !important;
-                flex-direction: row !important;   /* Biru dan putih wajib bergandengan */
-                width: 1500px !important;         /* Lebar kertas dinaikkan agar putih bisa tampil penuh */
-                height: auto !important;
-                min-height: 100vh !important;
-                overflow: visible !important;
-            }
-            .sidebar {
-                width: 280px !important;          /* Lebar panel biru */
-                flex-shrink: 0 !important;
-                height: 100vh !important;
-                position: relative !important;    /* Tidak dikunci, ikut terseret bareng */
-                display: block !important;
-            }
-            .main-content {
-                width: 1200px !important;         /* Ruang lembar putih dibuat ekstra luas seukuran laptop */
-                min-width: 100vw !important;      /* Paksa agar minimal selebar layar HP */
-                flex-shrink: 0 !important;
-                height: auto !important;
-                min-height: 100vh !important;
-                overflow: visible !important;
-                padding: 20px !important;
-                box-sizing: border-box !important;
-            }
-        }
+/* KODE REVISI: PANEL BIRU LEBIH RAMPING & AREA SOAL LEBIH LUAS */
 
+.app-container {
+    display: flex;
+    flex-direction: row; 
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* 1. Panel Biru Diperkecil */
+.sidebar {
+    width: 220px;       /* Dikurangi dari 280px menjadi 220px agar lebih ramping */
+    flex-shrink: 0;     /* Mengunci agar panel biru tidak menjepit menu di dalamnya */
+    background-color: #007bff; 
+}
+
+/* 2. Panel Putih Maksimal untuk Soal */
+.main-content {
+    flex-grow: 1;       /* Otomatis melebar menghabiskan seluruh sisa layar */
+    width: 0;           /* Trik CSS agar teks soal panjang tidak merusak/mendorong layout */
+    padding: 24px;      /* Ruang dalam sedikit diperlebar agar membaca soal lebih nyaman */
+    box-sizing: border-box;
+}
+
+/* 3. Penyesuaian Otomatis di Layar HP */
+@media screen and (max-width: 768px) {
+    .app-container {
+        flex-direction: column; 
+    }
+
+    .sidebar {
+        width: 100%;    
+        height: auto;   
+    }
+
+    .main-content {
+        width: 100%;    
+        padding: 16px;  /* Jarak teks ke tepi layar HP sedikit dirapatkan agar hemat ruang */
+    }
+}
     
     </style>
 </head>
