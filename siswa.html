@@ -51,36 +51,38 @@
         .modal-form input { padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; }
         .modal-btn { padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; }
 
-        /* KODE FIX: BEBAS GESER KIRI-KANAN-ATAS-BAWAH TANPA TERKUNCI */
+        /* KODE FIX: PANEL BIRU BISA TERDORONG KELUAR MELEWATI LAYAR HP */
         @media screen and (max-width: 768px) {
             html, body {
-                overflow: auto !important; /* Bebaskan scroll bawaan browser */
-                width: auto !important;
-                height: auto !important;
+                width: max-content !important;    /* Paksa browser mengikuti total lebar kertas */
+                min-width: 100vw !important;
+                overflow: auto !important;        /* Aktifkan geser bebas atas-bawah-kiri-kanan */
+                display: block !important;
             }
             .app-container {
                 display: flex !important;
-                flex-direction: row !important; /* Tetap bersanding kiri-kanan */
-                width: 1300px !important;       /* Buat kanvas lebar seukuran laptop */
+                flex-direction: row !important;   /* Biru dan putih wajib bergandengan */
+                width: 1500px !important;         /* Lebar kertas dinaikkan agar putih bisa tampil penuh */
                 height: auto !important;
                 min-height: 100vh !important;
                 overflow: visible !important;
             }
             .sidebar {
-                width: 280px !important;        /* Ukuran menu biru */
+                width: 280px !important;          /* Lebar panel biru */
                 flex-shrink: 0 !important;
                 height: 100vh !important;
-                position: relative !important;  /* LEPASKAN KUNCI! Biar bisa digeser hilang ke kiri */
-                top: auto !important;
-                left: auto !important;
+                position: relative !important;    /* Tidak dikunci, ikut terseret bareng */
+                display: block !important;
             }
             .main-content {
-                width: 1020px !important;       /* Ruang lembar kerja putih menjadi sangat luas */
+                width: 1200px !important;         /* Ruang lembar putih dibuat ekstra luas seukuran laptop */
+                min-width: 100vw !important;      /* Paksa agar minimal selebar layar HP */
                 flex-shrink: 0 !important;
                 height: auto !important;
+                min-height: 100vh !important;
                 overflow: visible !important;
                 padding: 20px !important;
-                box-sizing: border-box;
+                box-sizing: border-box !important;
             }
         }
 
