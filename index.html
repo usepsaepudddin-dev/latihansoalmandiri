@@ -74,10 +74,26 @@
             <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">Silakan masukkan token untuk mulai ujian</p>
         </div>
         <form id="formAksesSiswa" onsubmit="prosesMasukSiswa(event)" autocomplete="off">
-            <div style="margin-bottom: 20px;">
-                <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Token Ujian Utama</label>
-                <input type="text" id="loginToken" required placeholder="MASUKKAN TOKEN DARI GURU" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; box-sizing: border-box;">
-            </div>
+    <!-- 1. INPUT NAMA LENGKAP -->
+    <div style="margin-bottom: 15px;">
+        <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Nama Lengkap</label>
+        <input type="text" id="loginNama" required placeholder="Contoh: Budi Pratama" 
+        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;">
+    </div>
+
+    <!-- 2. INPUT KELAS -->
+    <div style="margin-bottom: 15px;">
+        <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Kelas</label>
+        <input type="text" id="loginKelas" required placeholder="Contoh: XII RPL 1" 
+        style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;">
+    </div>
+
+    <!-- 3. INPUT TOKEN UJIAN UTAMA -->
+    <div style="margin-bottom: 20px;">
+        <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Token Ujian Utama</label>
+        <input type="text" id="loginToken" required placeholder="MASUKKAN TOKEN DARI GURU" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; box-sizing: border-box;">
+    </div>
+
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="tutupModalSiswa()" style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #64748b; font-weight: bold; cursor: pointer;">Batal</button>
                 <button type="submit" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: #4f46e5; color: white; font-weight: bold; cursor: pointer;">Mulai Ujian</button>
@@ -100,15 +116,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.tutupModalSiswa = function() {
         document.getElementById('modalMasukSiswa').style.display = 'none';
+        document.getElementById('loginNama').value = '';
+        document.getElementById('loginKelas').value = '';
         document.getElementById('loginToken').value = '';
     };
 
-    // 2. Logika Validasi Token Kerja Kerja Langsung ke Server
+    // 2. Logika Validasi Token dan Penyimpanan Identitas Siswa
     window.prosesMasukSiswa = async function(event) {
         event.preventDefault();
+        
+        // Mengambil data input Nama, Kelas, dan Token
+        const namaInput = document.getElementById('loginNama').value.trim();
+        const kelasInput = document.getElementById('loginKelas').value.trim();
         const tokenInput = document.getElementById('loginToken').value.trim().toUpperCase();
 
+        // Validasi dasar agar input tidak kosong
+        if (!namaInput || !kelasInput) {
+            alert("Nama Lengkap dan Kelas wajib diisi!");
+            return;
+        }
+
         try {
+            // 1. Ambil token aktif untuk validasi login
             const { data: dataToken, error: errorToken } = await clientSupabase
                 .from('token_ujian')
                 .select('token_aktif')
@@ -121,6 +150,59 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (tokenInput === dataToken.token_aktif) {
+                
+                // === AMBIL DATA SOAL & PERTEMUAN SECARA DINAMIS ===
+                const { count: jumlahSoalDinamis, error: errorHitungSoal } = await clientSupabase
+                    .from('soal')
+                    .select('*', { count: 'exact', head: true });
+
+                if (errorHitungSoal) {
+                    alert("Gagal mengambil data total soal: " + errorHitungSoal.message);
+                    return;
+                }
+
+                const { data: dataPertemuan, error: errorPertemuan } = await clientSupabase
+                    .from('pertemuan')
+                    .select('id') 
+                    .limit(1)
+                    .single();
+
+                const pertemuanDinamis = (dataPertemuan && !errorPertemuan) ? String(dataPertemuan.id) : "1";
+                // ==================================================
+
+                // === A. UPDATE NAMA SISWA DI TABEL TOKEN_UJIAN ===
+                const { error: errorUpdateToken } = await clientSupabase
+                    .from('token_ujian')
+                    .update({ nama_siswa: namaInput }) 
+                    .eq('id', 1);
+
+                if (errorUpdateToken) {
+                    alert("Gagal memperbarui data token: " + errorUpdateToken.message);
+                    return;
+                }
+
+                // === B. INSERT DATA BARU KE TABEL RIWAYAT_NILAI ===
+                const { error: errorInsertRiwayat } = await clientSupabase
+                    .from('riwayat_nilai') 
+                    .insert([
+                        { 
+                            nama_siswa: namaInput,     
+                            kelas: kelasInput,          
+                            pertemuan: pertemuanDinamis,     
+                            total_soal: jumlahSoalDinamis    
+                        }
+                    ]);
+
+                if (errorInsertRiwayat) {
+                    alert("Gagal menyimpan data ke riwayat nilai: " + errorInsertRiwayat.message);
+                    return; 
+                }
+
+                // === C. SIMPAN KE PENYIMPANAN BROWSER UNTUK SISWA.HTML ===
+                localStorage.setItem('siswa_nama', namaInput);
+                localStorage.setItem('siswa_kelas', kelasInput);
+
+                // Alihkan halaman ke lembar ujian siswa
                 window.location.href = "siswa.html";
             } else {
                 alert("Token Ujian Salah! Periksa kembali kode dari Guru Pengawas.");
@@ -129,35 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Kesalahan sistem: " + err.message);
         }
     };
-
-    // 3. Tombol Akses Admin / Guru
-    const btnAdmin = document.getElementById('btnAksesAdmin');
-    if (btnAdmin) {
-        btnAdmin.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const inputPin = prompt("Masukkan PIN Pengaman Aplikasi:");
-            if (!inputPin) return;
-            try {
-                const { data: hasilCek, error } = await clientSupabase
-                    .from('konfirmasi_keamanan')
-                    .select('pin_admin')
-                    .eq('id', 1);
-                
-                if (error) {
-                    alert("Koneksi gagal: " + error.message);
-                    return;
-                }
-                if (hasilCek && hasilCek.length > 0 && String(hasilCek[0].pin_admin).trim() === String(inputPin).trim()) {
-                    window.location.href = "dashboard.html";
-                } else {
-                    alert("Kunci Salah! Akses ditolak.");
-                }
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
-        });
-    }
-});
+}); // <--- PERBAIKAN: DISINI ADALAH PENUTUP UNTUK DOMCONTENTLOADED YANG TADI HILANG
 </script>
 </body>
 </html>
