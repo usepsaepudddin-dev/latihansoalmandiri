@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instrument Penilaian - Premium Admin Dashboard</title>
     
@@ -19,21 +19,21 @@
     <!-- Tambahkan baris ini tepat di bawah <head> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Siswa</title>
-    </head>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); padding: 20px; }
-.portal-container { background: #ffffff; padding: 40px 30px; border-radius: 24px; width: 100%; max-width: 500px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
-.portal-logo { font-size: 55px; color: #4f46e5; margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(79, 70, 229, 0.2)); }
-.portal-container h2 { color: #0f172a; font-size: 24px; font-weight: 800; margin-bottom: 6px; }
-.portal-container p { color: #64748b; font-size: 14px; margin-bottom: 30px; }
-.choice-box { display: flex; flex-direction: column; gap: 16px; }
-.portal-btn { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; text-decoration: none; text-align: left; transition: all 0.25s ease; cursor: pointer; background: #ffffff; width: 100%; outline: none; }
-.portal-btn:hover { border-color: #4f46e5; background-color: #f8fafc; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1); }
-.portal-btn i { font-size: 24px; color: #4f46e5; background: #eef2ff; padding: 12px; border-radius: 12px; width: 48px; text-align: center; }
-.btn-text h4 { color: #1e293b; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
-.btn-text span { color: #64748b; font-size: 12px; }
-</style>
+    </head>  
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); padding: 20px; }
+        .portal-container { background: #ffffff; padding: 40px 30px; border-radius: 24px; width: 100%; max-width: 500px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
+        .portal-logo { font-size: 55px; color: #4f46e5; margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(79, 70, 229, 0.2)); }
+        .portal-container h2 { color: #0f172a; font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+        .portal-container p { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+        .choice-box { display: flex; flex-direction: column; gap: 16px; }
+        .portal-btn { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; text-decoration: none; text-align: left; transition: all 0.25s ease; cursor: pointer; background: #ffffff; width: 100%; outline: none; }
+        .portal-btn:hover { border-color: #4f46e5; background-color: #f8fafc; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1); }
+        .portal-btn i { font-size: 24px; color: #4f46e5; background: #eef2ff; padding: 12px; border-radius: 12px; width: 48px; text-align: center; }
+        .btn-text h4 { color: #1e293b; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .btn-text span { color: #64748b; font-size: 12px; }
+    </style>
 </head>
 <body>
 
@@ -43,17 +43,16 @@ body { display: flex; justify-content: center; align-items: center; min-height: 
     </div>
     <h2>Aplikasi Latihan Soal</h2>
     <p>Silakan pilih hak akses masuk di bawah ini</p>
-    
+
     <div class="choice-box">
         <!-- 1. TOMBOL AKSES SISWA -->
-        <div onclick="bukaModalSiswa()" class="portal-btn" style="cursor: pointer;">
+        <div onclick="bukaModalSiswa()" class="portal-btn">
             <i class="fa-solid fa-user-graduate"></i>
             <div class="btn-text">
                 <h4>Masuk sebagai Siswa</h4>
                 <span>Mulai kerjakan latihan soal mandiri</span>
             </div>
         </div>
-
         <!-- 2. TOMBOL AKSES GURU / ADMIN -->
         <button class="portal-btn" id="btnAksesAdmin">
             <i class="fa-solid fa-user-shield"></i>
@@ -67,28 +66,18 @@ body { display: flex; justify-content: center; align-items: center; min-height: 
 
 <!-- KOTAK POP-UP INPUT DATA SISWA -->
 <div id="modalMasukSiswa" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3); font-family: 'Roboto', sans-serif; text-align: left;">
-        
+    <div style="background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3); text-align: left;">
         <div style="text-align: center; margin-bottom: 20px;">
+            <!-- Ikon Mahasiswa Dipertahankan -->
             <i class="fa-solid fa-user-graduate" style="font-size: 40px; color: #4f46e5;"></i>
             <h3 style="margin-top: 10px; font-size: 20px; color: #0f172a; font-weight: 800;">Data Peserta Ujian</h3>
-            <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">Silakan lengkapi data untuk mulai ujian</p>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 0;">Silakan masukkan token untuk mulai ujian</p>
         </div>
-        
         <form id="formAksesSiswa" onsubmit="prosesMasukSiswa(event)" autocomplete="off">
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Nama Lengkap</label>
-                <input type="text" id="loginNama" required placeholder="Contoh: Budi Pratama" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Nomor Peserta / NIS</label>
-                <input type="text" id="loginNoPeserta" required placeholder="Contoh: 2024001" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; box-sizing: border-box;">
-            </div>
             <div style="margin-bottom: 20px;">
                 <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Token Ujian Utama</label>
-                <input type="text" id="loginToken" required placeholder="Masukkan Token dari Guru" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; box-sizing: border-box;">
+                <input type="text" id="loginToken" required placeholder="MASUKKAN TOKEN DARI GURU" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; box-sizing: border-box;">
             </div>
-            
             <div style="display: flex; gap: 10px;">
                 <button type="button" onclick="tutupModalSiswa()" style="flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #64748b; font-weight: bold; cursor: pointer;">Batal</button>
                 <button type="submit" style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: #4f46e5; color: white; font-weight: bold; cursor: pointer;">Mulai Ujian</button>
@@ -96,12 +85,52 @@ body { display: flex; justify-content: center; align-items: center; min-height: 
         </form>
     </div>
 </div>
-<!-- LOGIKA JAVASCRIPT UTUH UTK GURU DAN SISWA -->
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // ==========================================
-    // LOGIKA AKSES GURU / ADMIN (KODE ASLI ANDA)
-    // ==========================================
+    // Inisialisasi Kredensial Supabase Anda
+    const SUPABASE_URL = "https://ytdjzzcosnwqcqzetbph.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_AjyOuS5KjBLsSNLSSVSGvA_Ig0ogX93"; 
+    const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 1. Fungsi Buka & Tutup Modal diikat langsung ke scope global agar tombol onclick berfungsi
+    window.bukaModalSiswa = function() {
+        document.getElementById('modalMasukSiswa').style.display = 'flex';
+    };
+
+    window.tutupModalSiswa = function() {
+        document.getElementById('modalMasukSiswa').style.display = 'none';
+        document.getElementById('loginToken').value = '';
+    };
+
+    // 2. Logika Validasi Token Kerja Kerja Langsung ke Server
+    window.prosesMasukSiswa = async function(event) {
+        event.preventDefault();
+        const tokenInput = document.getElementById('loginToken').value.trim().toUpperCase();
+
+        try {
+            const { data: dataToken, error: errorToken } = await clientSupabase
+                .from('token_ujian')
+                .select('token_aktif')
+                .eq('id', 1) 
+                .single();
+
+            if (errorToken || !dataToken) {
+                alert("Gagal mengambil token acuan di server Supabase.");
+                return;
+            }
+
+            if (tokenInput === dataToken.token_aktif) {
+                window.location.href = "siswa.html";
+            } else {
+                alert("Token Ujian Salah! Periksa kembali kode dari Guru Pengawas.");
+            }
+        } catch (err) {
+            alert("Kesalahan sistem: " + err.message);
+        }
+    };
+
+    // 3. Tombol Akses Admin / Guru
     const btnAdmin = document.getElementById('btnAksesAdmin');
     if (btnAdmin) {
         btnAdmin.addEventListener('click', async (e) => {
@@ -109,87 +138,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const inputPin = prompt("Masukkan PIN Pengaman Aplikasi:");
             if (!inputPin) return;
             try {
-                const SUPABASE_URL = "https://ytdjzzcosnwqcqzetbph.supabase.co";
-                const SUPABASE_ANON_KEY = "sb_publishable_AjyOuS5KjBLsSNLSSVSGvA_Ig0ogX93"; 
-                const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
                 const { data: hasilCek, error } = await clientSupabase
                     .from('konfirmasi_keamanan')
                     .select('pin_admin')
                     .eq('id', 1);
                 
                 if (error) {
-                    alert("Gagal terhubung dengan server pengaman: " + error.message);
+                    alert("Koneksi gagal: " + error.message);
                     return;
                 }
-                if (!hasilCek || hasilCek.length === 0) {
-                    alert("Konfigurasi keamanan di database belum siap.");
-                    return;
+                if (hasilCek && hasilCek.length > 0 && String(hasilCek[0].pin_admin).trim() === String(inputPin).trim()) {
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Kunci Salah! Akses ditolak.");
                 }
-                
-                const pinTerpan = String(hasilCek[0].pin_admin).trim();
-                const pinInput = String(inputPin).trim();
-                if (pinTerpan !== pinInput) {
-                    alert("Kunci Salah! Akses Panel Admin ditolak.");
-                    return;
-                }
-                window.location.href = "dashboard.html";
             } catch (err) {
-                alert("Terjadi kesalahan sistem pengaman: " + err.message);
+                alert("Error: " + err.message);
             }
         });
     }
 });
-
-// ==========================================
-// LOGIKA POP-UP & VALIDASI TOKEN AKSES SISWA
-// ==========================================
-function bukaModalSiswa() {
-    document.getElementById('modalMasukSiswa').style.display = 'flex';
-}
-
-function tutupModalSiswa() {
-    document.getElementById('modalMasukSiswa').style.display = 'none';
-}
-
-async function prosesMasukSiswa(event) {
-    event.preventDefault();
-    
-    const nama = document.getElementById('loginNama').value.trim();
-    const noPeserta = document.getElementById('loginNoPeserta').value.trim();
-    const token = document.getElementById('loginToken').value.trim().toUpperCase();
-    
-    // TOKEN AKSES UTAMA PERTAMA KALI MASUK
-    if (token === "MASUK-UJIAN") {
-        try {
-            const SUPABASE_URL = "https://ytdjzzcosnwqcqzetbph.supabase.co";
-            const SUPABASE_ANON_KEY = "sb_publishable_AjyOuS5KjBLsSNLSSVSGvA_Ig0ogX93"; 
-            const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // Setel status awal di database agar tidak terkunci saat lembar soal dibuka
-            await clientSupabase
-                .from('token_ujian')
-                .upsert({ 
-                    nomor_peserta: noPeserta, 
-                    token_aktif: token, 
-                    status_terkunci: false 
-                }, { onConflict: 'nomor_peserta' });
-            
-            // Simpan memori identitas di browser untuk ditarik di halaman siswa.html
-            localStorage.setItem('siswa_nama', nama);
-            localStorage.setItem('siswa_no_peserta', noPeserta);
-            
-            // Pindah halaman ke lembar ujian siswa
-            window.location.href = "siswa.html";
-        } catch (err) {
-            alert("Gagal mengonfigurasi database pengaman siswa.");
-            console.error(err);
-        }
-    } else {
-        alert("Token Ujian Salah! Silakan minta token utama yang aktif kepada Guru Pengawas.");
-    }
-}
 </script>
-
 </body>
 </html>

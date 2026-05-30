@@ -549,27 +549,30 @@ async function hitungNilaiSiswa() {
     }
 }
 
-
-
-// Fungsi untuk mengirim riwayat kecurangan ke database Supabase
+// 1. FUNGSI MENCATAT KECURANGAN KE SUPABASE (Sudah Diperbaiki agar Tidak Error karena Login Tanpa Nama)
+// =================================================================
+// 1. FUNGSI MENCATAT KECURANGAN KE SUPABASE (SUDAH DIPERBAIKI)
+// =================================================================
 async function catatKecuranganKeSupabase(jenisPelanggaran) {
-    // Ambil nama siswa dari elemen teks di header Anda
-    const namaSiswa = document.getElementById('txtInfoSiswa').innerText.replace('Siswa: ', '');
-    
+    let namaSiswa = "Peserta Ujian Aktif";
+    const elemenInfo = document.getElementById('txtInfoSiswa');
+    if (elemenInfo && elemenInfo.innerText.trim() !== "") {
+        namaSiswa = elemenInfo.innerText.replace('Siswa: ', '');
+    }
     try {
-        const { data, error } = await supabase
-            .from('log_kecurangan')
-            .insert([
-                { nama_siswa: namaSiswa, jenis_pelanggaran: jenisPelanggaran }
-            ]);
-            
-        if (error) console.error('Gagal mencatat:', error);
+        if (window.clientSupabaseGlobal) {
+            await window.clientSupabaseGlobal
+                .from('log_kecurangan')
+                .insert([{ nama_siswa: namaSiswa.trim(), jenis_pelanggaran: jenisPelanggaran }]);
+        }
     } catch (err) {
-        console.error('Sistem error:', err);
+        console.error('Gagal mencatat log kecurangan:', err);
     }
 }
 
-// 1. BLOKIR COPY, PASTE, DAN KLIK KANAN
+// =================================================================
+// 2. PROTEKSI INPUT: KLIK KANAN, COPY, DAN PASTE
+// =================================================================
 document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 document.addEventListener('copy', function(e) { 
     e.preventDefault(); 
@@ -578,65 +581,61 @@ document.addEventListener('copy', function(e) {
 document.addEventListener('paste', function(e) { e.preventDefault(); });
 
 document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's') || e.key === 'F12') {
+    if ((e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's')) || e.key === 'F12') {
         e.preventDefault();
         catatKecuranganKeSupabase("Menekan tombol terlarang (Ctrl+C/V/U/F12)");
         alert("Peringatan: Tindakan ini dilarang selama ujian!");
     }
 });
 
-// 2. DETEKSI PINDAH TAB DENGAN HUKUMAN KUNCI WAKTU OTOMATIS (TANPA REPOT REKONSILIASI GURU)
-// Variabel penguji global agar log kecurangan tidak terkirim dobel
+// =================================================================
+// 3. SISTEM SANKSI OTOMATIS KELUAR & PENGHANCURAN TOKEN UTAMA
+// =================================================================
 window.apakahTerkunci = false;
 
-// PERBAIKAN: Menggunakan event 'blur' agar langsung mengunci instan saat kursor pindah tab
-window.addEventListener('blur', function() {
-    const layarKunci = document.getElementById('layarKunci');
-    const kolomStatusKunci = document.getElementById('inputTokenReset');
-    
-    // Jika layar sudah dalam posisi terkunci, abaikan agar tidak bertumpuk
+window.addEventListener('blur', async function() {
+    // Cegah fungsi berjalan ganda secara bersamaan
     if (window.apakahTerkunci) return;
     window.apakahTerkunci = true;
 
-    // Tampilkan layar hitam pengunci secara paksa
-    if (layarKunci) {
-        layarKunci.style.display = 'block';
-    }
-    
-    // Catat otomatis riwayat kecurangan siswa ke database cloud Anda
-    if (typeof catatKecuranganKeSupabase === 'function') {
-        catatKecuranganKeSupabase("Keluar halaman ujian (Aplikasi Terkunci Total)");
-    }
+    // Siapkan kode token acak pengunci baru (Contoh: ACAK-W9B4)
+    const tokenAcakBaru = "ACAK-" + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-    // Bebaskan kolom input agar siap diketikkan token baru dari database Supabase
-    if (kolomStatusKunci) {
-        kolomStatusKunci.disabled = false; // Kolom diaktifkan agar Guru bisa mengetik token
-        kolomStatusKunci.placeholder = "Masukkan Token Baru dari Guru...";
+    try {
+        // Jalankan perintah update langsung menggunakan variabel global Anda
+        if (window.clientSupabaseGlobal) {
+            await window.clientSupabaseGlobal
+                .from('token_ujian')
+                .update({ token_aktif: tokenAcakBaru })
+                .eq('id', 1);
+            
+            console.log("Token lama hangus! Berubah menjadi: " + tokenAcakBaru);
+        } else {
+            console.error("Variabel window.clientSupabaseGlobal belum siap!");
+        }
+    } catch (err) {
+        console.error("Gagal memperbarui token ke server Supabase:", err);
+    } finally {
+        // Tampilkan peringatan sanksi tegas di layar siswa
+        alert("⚠️ PELANGGARAN TERDETEKSI!\n\nSanksi: Anda terdeteksi keluar dari halaman ujian. Anda dikeluarkan secara paksa dan token utama telah dinonaktifkan oleh sistem!");
+
+        // Bersihkan riwayat login di browser komputer siswa
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Pindahkan paksa ke halaman login utama
+        window.location.href = "index.html";
     }
 });
 
-
-// 3. DETEKSI JIKA SISWA MENGECILKAN UKURAN BROWSER (SPLIT SCREEN)
+// =================================================================
+// 4. DETEKSI LAYAR TERBELAH / SPLIT SCREEN
+// =================================================================
 window.addEventListener('resize', function() {
     if (window.innerWidth < 400 || window.innerHeight < 400) {
         alert("Jangan membagi layar (split-screen) atau memperkecil ukuran jendela browser saat ujian!");
     }
 });
-
 </script>
-<!-- Pop-up Layar Terkunci Batas Anti-Curang -->
-<div id="layarKunci" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; color: white; text-align: center; padding-top: 15vh; font-family: 'Roboto', sans-serif;">
-    <i class="fa-solid fa-user-lock" style="font-size: 80px; color: #ff4d4d; margin-bottom: 20px;"></i>
-    <h2 style="color: #ff4d4d;">UJIAN ANDA TERKUNCI!</h2>
-    <p style="margin: 15px auto; width: 80%; max-width: 500px; font-size: 16px; opacity: 0.8;">
-        Anda terdeteksi meninggalkan halaman ujian atau membuka aplikasi lain. Silakan lapor ke Guru Pengawas untuk meminta <span style="color: #38bdf8; font-weight: bold;">Token Reset Baru</span>.
-    </p>
-    <div style="margin-top: 30px;">
-        <input type="text" id="inputTokenReset" placeholder="Masukkan Token Baru dari Guru..." style="padding: 12px; width: 260px; border-radius: 6px; border: none; font-size: 16px; text-align: center; text-transform: uppercase; color: #333; font-weight: bold; outline: none;">
-        <button onclick="verifikasiTokenBaru()" style="padding: 12px 25px; background: #38bdf8; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; margin-left: 10px;">Buka Ujian</button>
-    </div>
-    <p id="pesanTokenSalah" style="color: #ff4d4d; margin-top: 15px; font-weight: bold; display: none;">Token salah atau sudah kadaluwarsa!</p>
-</div>
-
 </body>
 </html>

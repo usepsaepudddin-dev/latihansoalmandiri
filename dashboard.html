@@ -181,10 +181,16 @@ td { padding: 10px; border: 1px solid #e2e8f0; color: #334155; }
                 Usep Saepudin
             </div>
             
-            <!-- Tombol Keluar Tetap di Atas Amat Sangat Aman -->
-            <a href="logout.php" style="color: #ff4d4d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: bold; background: rgba(255, 77, 77, 0.1); padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(255, 77, 77, 0.2);">
-                <i class="fa-solid fa-right-from-bracket"></i> Keluar Aplikasi
+            <!-- Tombol Ganti Token Baru -->
+        <a href="#" onclick="aksiGantiToken(event)" style="color: #3b82f6; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: bold; background: rgba(59, 130, 246, 0.1); padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(59, 130, 246, 0.2); margin-right: 8px;">
+        <i class="fa-solid fa-key"></i> Ganti Token Ujian
+        </a>
+
+           <!-- Tombol Keluar yang Sudah Disempurnakan (Aman 100%) -->
+            <a href="#" onclick="aksiKeluarAplikasi(event)" style="color: #ff4d4d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: bold; background: rgba(255, 77, 77, 0.1); padding: 5px 12px; border-radius: 4px; border: 1px solid rgba(255, 77, 77, 0.2);">
+             <i class="fa-solid fa-right-from-bracket"></i> Keluar Aplikasi
             </a>
+
         </div>
 
         <!-- Bagian Bawah: Menggunakan SCROLL (Bisa digulir jika menu terlalu panjang) -->
@@ -275,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById('pertemuanContainer');
     const btnAdd = document.getElementById('btnAddPertemuan');
     const btnMenuKelola = document.getElementById('btnMenuKelola');
+    muatStatistikDashbor();
 
     // Fungsi otomatis membuat token dan membuka kunci siswa
 async function buatTokenReset(nomorPeserta) {
@@ -302,43 +309,13 @@ async function buatTokenReset(nomorPeserta) {
 
     // 2. PENANGANAN KLIK MENU KELOLA APLIKASI (DENGAN PIN)
     if (btnMenuKelola) {
-        btnMenuKelola.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const inputPin = prompt("Masukkan PIN Pengaman Aplikasi untuk Masuk:");
-            if (!inputPin) return;
-            try {
-                const { data: hasilCek, error } = await clientSupabase
-                    .from('konfirmasi_keamanan')
-                    .select('pin_admin')
-                    .eq('id', 1);
-                if (error) {
-                    alert("Gagal terhubung dengan server pengaman: " + error.message);
-                    return;
-                }
-                if (!hasilCek || hasilCek.length === 0) {
-                    const { error: errorInsert } = await clientSupabase
-                        .from('konfirmasi_keamanan')
-                        .insert([{ id: 1, pin_admin: inputPin.trim() }]);
-                    if (errorInsert) { 
-                        alert("Gagal mendaftarkan PIN baru: " + errorInsert.message); 
-                        return; 
-                    }
-                    alert("PIN Master berhasil didaftarkan! Selamat Datang.");
-                    bukaFormKelolaAplikasi();
-                    return;
-                }
-                const pinTerpan = String(hasilCek[0].pin_admin).trim();
-                const pinInput = String(inputPin).trim();
-                if (pinTerpan !== pinInput) {
-                    alert("Akses Ditolak! PIN Manajemen Aplikasi salah.");
-                    return;
-                }
-                bukaFormKelolaAplikasi();
-            } catch (err) {
-                alert("Terjadi kesalahan sistem PIN: " + err.message);
-            }
-        });
-    }
+    btnMenuKelola.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Langsung membuka form kelola aplikasi tanpa syarat PIN
+        bukaFormKelolaAplikasi();
+    });
+}
+
 
     // 3. MENAMPILKAN DAFTAR PERTEMUAN DI SIDEBAR ADMIN
     function renderItemPertemuan(item) {
@@ -359,6 +336,58 @@ async function buatTokenReset(nomorPeserta) {
         };
         container.appendChild(link);
     }
+
+// FUNGSI UNTUK MENGHITUNG DAN MEMUAT STATISTIK DASHBOR SECARA DINAMIS
+async function muatStatistikDashbor() {
+    try {
+        // 1. Hitung Baris Tabel Pertemuan
+        const { count: jmlPertemuan } = await clientSupabase
+            .from('pertemuan').select('*', { count: 'exact', head: true });
+
+        // 2. Hitung Baris Tabel Soal
+        const { count: jmlSoal } = await clientSupabase
+            .from('soal').select('*', { count: 'exact', head: true });
+
+        // 3. Hitung Baris Tabel Riwayat Nilai Siswa
+        const { count: jmlSiswa } = await clientSupabase
+            .from('riwayat_nilai').select('*', { count: 'exact', head: true });
+
+        // 4. Ambil 5 Data Aktivitas Siswa Terbaru
+        const { data: aktivitas } = await clientSupabase
+            .from('riwayat_nilai')
+            .select('nama_siswa, kelas, pertemuan, total_soal')
+            .order('id', { ascending: false })
+            .limit(5);
+
+        // 5. Suntikkan Angka ke Elemen HTML Widget Dasbor Anda
+        if (document.getElementById('widgetTotalPertemuan')) document.getElementById('widgetTotalPertemuan').innerText = jmlPertemuan || 0;
+        if (document.getElementById('widgetTotalSoal')) document.getElementById('widgetTotalSoal').innerText = jmlSoal || 0;
+        if (document.getElementById('widgetTotalSiswa')) document.getElementById('widgetTotalSiswa').innerText = jmlSiswa || 0;
+
+        // 6. Suntikkan Baris Data ke Tabel Aktivitas Terbaru
+        const tbody = document.getElementById('tabelAktivitasTerbaru');
+        if (tbody) {
+            tbody.innerHTML = '';
+            if (!aktivitas || aktivitas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#94a3b8;">Belum ada aktivitas ujian.</td></tr>`;
+                return;
+            }
+            aktivitas.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#334155; font-weight:500;">${r.nama_siswa || '-'}</td>
+                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#64748b;">${r.kelas || '-'}</td>
+                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#64748b;">Pertemuan ${r.pertemuan || '-'}</td>
+                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; text-align:center;"><span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:600; font-size:12px;">${r.total_soal || 0} Benar</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    } catch (err) {
+        console.error("Gagal memperbarui widget statistik:", err);
+    }
+}
+
 
     // 4. AMBIL DATA PERTEMUAN DARI CLOUD
     async function ambilSemuaPertemuan() {
@@ -615,6 +644,48 @@ window.bukaEditSesuaiID = function(idSoal) {
 
     document.getElementById('btnSimpanForm').innerText = "Update & Simpan Perubahan";
     document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
+};
+window.aksiKeluarAplikasi = function(e) {
+    e.preventDefault();
+    
+    const konfirmasi = confirm("Apakah Anda yakin ingin keluar dari aplikasi?");
+    if (!konfirmasi) return;
+
+    // 1. Bersihkan seluruh penyimpanan sesi di browser (Nama, No Peserta, dll)
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 2. Tendang kembali ke halaman depan portal login utama
+    // Ganti "index.html" sesuai dengan nama file portal depan Anda
+    window.location.href = "index.html"; 
+};
+window.aksiGantiToken = async function(e) {
+    e.preventDefault();
+    
+    // 1. Minta input token baru dari Guru/Admin via kotak dialog
+    const tokenBaru = prompt("Masukkan Token Ujian Utama yang Baru:");
+    
+    // Jika admin menekan tombol 'Batal' atau mengosongkan input, batalkan proses
+    if (!tokenBaru || tokenBaru.trim() === "") return;
+
+    const tokenBersih = tokenBaru.trim().toUpperCase();
+
+    try {
+        //Pastikan objek clientSupabase sudah terdefinisi di file admin Anda
+        // 2. Update kolom token_aktif di database Supabase pada baris id = 1
+        const { error } = await clientSupabase
+            .from('token_ujian')
+            .update({ token_aktif: tokenBersih })
+            .eq('id', 1);
+
+        if (error) {
+            alert("Gagal memperbarui token di server: " + error.message);
+        } else {
+            alert("Selamat! Token ujian berhasil diubah menjadi: " + tokenBersih);
+        }
+    } catch (err) {
+        alert("Terjadi kesalahan koneksi sistem: " + err.message);
+    }
 };
 
 
