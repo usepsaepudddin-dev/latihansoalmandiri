@@ -107,18 +107,21 @@ html, body {
         padding: 20px; 
     }
     .app-container { 
-        width: 100%; 
+        width: 100% !important; 
         max-width: 1240px; 
         height: 88vh; 
         border-radius: 24px; 
-        overflow: hidden; 
+        /* KODE YANG DIUBAH: Mengizinkan scroll ke bawah khusus di laptop */
+        overflow-y: auto !important; 
         box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); 
+        border: 1px solid #e2e8f0;
     }
     .main-content { 
-        width: auto;
-        flex: 1; 
+        width: auto !important;
+        flex: 1 !important; 
     }
 }
+
 </style>
 
     
@@ -567,39 +570,32 @@ document.addEventListener('keydown', function(e) {
 });
 
 // 2. DETEKSI PINDAH TAB DENGAN HUKUMAN KUNCI WAKTU OTOMATIS (TANPA REPOT REKONSILIASI GURU)
-document.addEventListener('visibilitychange', async function() {
-    if (document.hidden) {
-        // Tampilkan layar hitam pengunci secara paksa
-        const layarKunci = document.getElementById('layarKunci');
-        if (layarKunci) {
-            layarKunci.style.display = 'block';
-        }
-        
-        // Catat otomatis riwayat kecurangan siswa ke database cloud Anda
-        if (typeof catatKecuranganKeSupabase === 'function') {
-            catatKecuranganKeSupabase("Keluar halaman ujian (Aplikasi Dikunci Otomatis)");
-        }
+// Variabel penguji global agar log kecurangan tidak terkirim dobel
+window.apakahTerkunci = false;
 
-        // Mulai hitung mundur hukuman 3 menit (180 detik)
-        let sisaWaktuHukuman = 180; 
-        const kolomStatusKunci = document.getElementById('inputTokenReset');
-        
-        if (kolomStatusKunci) {
-            kolomStatusKunci.disabled = true; // Matikan kolom input agar tidak bisa diketik
-            
-            const intervalHukuman = setInterval(() => {
-                sisaWaktuHukuman--;
-                kolomStatusKunci.placeholder = "TERKUNCI! Sisa Hukuman: " + sisaWaktuHukuman + " Detik";
-                
-                // Jika waktu hukuman habis, buka kunci otomatis
-                if (sisaWaktuHukuman <= 0) {
-                    clearInterval(intervalHukuman);
-                    layarKunci.style.display = 'none';
-                    kolomStatusKunci.placeholder = "Masukkan Token Reset...";
-                    alert("Masa hukuman selesai! Silakan lanjut mengerjakan dan JANGAN pindah aplikasi lagi!");
-                }
-            }, 1000);
-        }
+// PERBAIKAN: Menggunakan event 'blur' agar langsung mengunci instan saat kursor pindah tab
+window.addEventListener('blur', function() {
+    const layarKunci = document.getElementById('layarKunci');
+    const kolomStatusKunci = document.getElementById('inputTokenReset');
+    
+    // Jika layar sudah dalam posisi terkunci, abaikan agar tidak bertumpuk
+    if (window.apakahTerkunci) return;
+    window.apakahTerkunci = true;
+
+    // Tampilkan layar hitam pengunci secara paksa
+    if (layarKunci) {
+        layarKunci.style.display = 'block';
+    }
+    
+    // Catat otomatis riwayat kecurangan siswa ke database cloud Anda
+    if (typeof catatKecuranganKeSupabase === 'function') {
+        catatKecuranganKeSupabase("Keluar halaman ujian (Aplikasi Terkunci Total)");
+    }
+
+    // Bebaskan kolom input agar siap diketikkan token baru dari database Supabase
+    if (kolomStatusKunci) {
+        kolomStatusKunci.disabled = false; // Kolom diaktifkan agar Guru bisa mengetik token
+        kolomStatusKunci.placeholder = "Masukkan Token Baru dari Guru...";
     }
 });
 
