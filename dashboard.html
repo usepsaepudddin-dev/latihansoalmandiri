@@ -506,35 +506,61 @@ if (!semuaSoal || semuaSoal.length === 0) {
     }
 
 window.isiDataFormEdit = function(soalString) {
-    const soal = JSON.parse(soalString.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
-    document.getElementById('editSoalId').value = soal.id;
-    document.getElementById('selectPertemuan').value = soal.pertemuan_id;
-    document.getElementById('selectJenisSoal').value = soal.jenis_soal;
-    document.getElementById('selectJenisSoal').dispatchEvent(new Event('change'));
-    document.getElementById('inputPertanyaan').value = soal.pertanyaan;
-    
-    if (soal.jenis_soal === 'pilihan_ganda' && Array.isArray(soal.pilihan_jawaban)) {
-        document.getElementById('opsiA').value = soal.pilihan_jawaban[0] || '';
-        document.getElementById('opsiB').value = soal.pilihan_jawaban[1] || '';
-        document.getElementById('opsiC').value = soal.pilihan_jawaban[2] || '';
-        document.getElementById('opsiD').value = soal.pilihan_jawaban[3] || '';
-        document.getElementById('opsiE').value = soal.pilihan_jawaban[4] || '';
+    try {
+        // PERBAIKAN: Melakukan penanganan escape character agar petik tunggal tidak membuat crash
+        const cleanString = soalString.replace(/&quot;/g, '"').replace(/\\'/g, "'").replace(/'/g, "\\'");
+        const soal = JSON.parse(cleanString);
+        
+        document.getElementById('editSoalId').value = soal.id;
+        document.getElementById('selectPertemuan').value = soal.pertemuan_id;
+        document.getElementById('selectJenisSoal').value = soal.jenis_soal;
+        
+        // Pemicu perubahan jenis soal
+        document.getElementById('selectJenisSoal').dispatchEvent(new Event('change'));
+        
+        document.getElementById('inputPertanyaan').value = soal.pertanyaan;
+        
+        // PERBAIKAN: Gunakan setTimeout 50ms agar browser selesai memunculkan elemen Opsi A-E sebelum diisi nilai
+        setTimeout(() => {
+            if (soal.jenis_soal === 'pilihan_ganda' && Array.isArray(soal.pilihan_jawaban)) {
+                if(document.getElementById('opsiA')) document.getElementById('opsiA').value = soal.pilihan_jawaban[0] || '';
+                if(document.getElementById('opsiB')) document.getElementById('opsiB').value = soal.pilihan_jawaban[1] || '';
+                if(document.getElementById('opsiC')) document.getElementById('opsiC').value = soal.pilihan_jawaban[2] || '';
+                if(document.getElementById('opsiD')) document.getElementById('opsiD').value = soal.pilihan_jawaban[3] || '';
+                if(document.getElementById('opsiE')) document.getElementById('opsiE').value = soal.pilihan_jawaban[4] || '';
+            }
+            // Isi kunci jawaban setelah opsi dipastikan siap
+            if(document.getElementById('kunciJawaban')) document.getElementById('kunciJawaban').value = soal.kunci_jawaban;
+        }, 50);
+
+        document.getElementById('btnSimpanForm').innerText = "Update & Simpan Perubahan";
+        document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (e) {
+        console.error("Gagal memuat data edit soal:", e);
+        alert("Gagal membaca data soal untuk diedit. Terjadi kesalahan format teks.");
     }
-    document.getElementById('kunciJawaban').value = soal.kunci_jawaban;
-    document.getElementById('btnSimpanForm').innerText = "Update & Simpan Perubahan";
-    document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
 };
 
 window.hapusSoalCloud = async function(id) {
     if (!confirm("Apakah Anda yakin ingin menghapus permanen data soal ini dari server?")) return;
-    const { error } = await clientSupabase.from('soal').delete().eq('id', id);
-    if (error) {
-        alert("Gagal menghapus data: " + error.message);
-    } else { 
-        alert("Soal berhasil dihapus!"); 
-        bukaFormKelolaAplikasi(); 
+    
+    try {
+        // PERBAIKAN: Memastikan menggunakan instance client Supabase yang aktif (menyesuaikan kode global Anda)
+        const supabase = window.clientSupabaseGlobal || window.clientSupabase || clientSupabase;
+        
+        const { error } = await supabase.from('soal').delete().eq('id', id);
+        if (error) {
+            alert("Gagal menghapus data: " + error.message);
+        } else { 
+            alert("Soal berhasil dihapus!"); 
+            bukaFormKelolaAplikasi(); 
+        }
+    } catch (err) {
+        alert("Koneksi ke server gagal: " + err.message);
     }
 };
+
 
     ambilSemuaPertemuan();
 });
