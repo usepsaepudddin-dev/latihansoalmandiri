@@ -507,20 +507,26 @@ if (!semuaSoal || semuaSoal.length === 0) {
 
 window.isiDataFormEdit = function(soalString) {
     try {
-        // PERBAIKAN: Melakukan penanganan escape character agar petik tunggal tidak membuat crash
-        const cleanString = soalString.replace(/&quot;/g, '"').replace(/\\'/g, "'").replace(/'/g, "\\'");
+        // Dekode karakter HTML entity standard dari database secara aman
+        let cleanString = soalString
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&apos;/g, "'");
+
+        // Konversi string mentah menjadi objek JSON asli
         const soal = JSON.parse(cleanString);
         
+        // Mengisi elemen form dasar
         document.getElementById('editSoalId').value = soal.id;
         document.getElementById('selectPertemuan').value = soal.pertemuan_id;
         document.getElementById('selectJenisSoal').value = soal.jenis_soal;
         
-        // Pemicu perubahan jenis soal
+        // Pemicu perubahan jenis soal (pilihan ganda / esai)
         document.getElementById('selectJenisSoal').dispatchEvent(new Event('change'));
         
         document.getElementById('inputPertanyaan').value = soal.pertanyaan;
         
-        // PERBAIKAN: Gunakan setTimeout 50ms agar browser selesai memunculkan elemen Opsi A-E sebelum diisi nilai
+        // Beri jeda 50ms agar elemen input opsi buatan Anda sempat merender di layar laptop
         setTimeout(() => {
             if (soal.jenis_soal === 'pilihan_ganda' && Array.isArray(soal.pilihan_jawaban)) {
                 if(document.getElementById('opsiA')) document.getElementById('opsiA').value = soal.pilihan_jawaban[0] || '';
@@ -529,7 +535,6 @@ window.isiDataFormEdit = function(soalString) {
                 if(document.getElementById('opsiD')) document.getElementById('opsiD').value = soal.pilihan_jawaban[3] || '';
                 if(document.getElementById('opsiE')) document.getElementById('opsiE').value = soal.pilihan_jawaban[4] || '';
             }
-            // Isi kunci jawaban setelah opsi dipastikan siap
             if(document.getElementById('kunciJawaban')) document.getElementById('kunciJawaban').value = soal.kunci_jawaban;
         }, 50);
 
@@ -537,30 +542,39 @@ window.isiDataFormEdit = function(soalString) {
         document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
         
     } catch (e) {
-        console.error("Gagal memuat data edit soal:", e);
+        // Jika JSON.parse gagal karena string pecah, gunakan metode evaluasi objek langsung (Fallback)
+        try {
+            let directObj = new Function("return " + soalString)();
+            if (directObj) {
+                document.getElementById('editSoalId').value = directObj.id;
+                document.getElementById('selectPertemuan').value = directObj.pertemuan_id;
+                document.getElementById('selectJenisSoal').value = directObj.jenis_soal;
+                document.getElementById('selectJenisSoal').dispatchEvent(new Event('change'));
+                document.getElementById('inputPertanyaan').value = directObj.pertanyaan;
+                
+                setTimeout(() => {
+                    if (directObj.jenis_soal === 'pilihan_ganda' && Array.isArray(directObj.pilihan_jawaban)) {
+                        if(document.getElementById('opsiA')) document.getElementById('opsiA').value = directObj.pilihan_jawaban[0] || '';
+                        if(document.getElementById('opsiB')) document.getElementById('opsiB').value = directObj.pilihan_jawaban[1] || '';
+                        if(document.getElementById('opsiC')) document.getElementById('opsiC').value = directObj.pilihan_jawaban[2] || '';
+                        if(document.getElementById('opsiD')) document.getElementById('opsiD').value = directObj.pilihan_jawaban[3] || '';
+                        if(document.getElementById('opsiE')) document.getElementById('opsiE').value = directObj.pilihan_jawaban[4] || '';
+                    }
+                    if(document.getElementById('kunciJawaban')) document.getElementById('kunciJawaban').value = directObj.kunci_jawaban;
+                }, 50);
+
+                document.getElementById('btnSimpanForm').innerText = "Update & Simpan Perubahan";
+                document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+        } catch (innerError) {
+            console.error("Metode cadangan juga gagal:", innerError);
+        }
+        
+        console.error("Gagal total memuat data edit soal:", e);
         alert("Gagal membaca data soal untuk diedit. Terjadi kesalahan format teks.");
     }
 };
-
-window.hapusSoalCloud = async function(id) {
-    if (!confirm("Apakah Anda yakin ingin menghapus permanen data soal ini dari server?")) return;
-    
-    try {
-        // PERBAIKAN: Memastikan menggunakan instance client Supabase yang aktif (menyesuaikan kode global Anda)
-        const supabase = window.clientSupabaseGlobal || window.clientSupabase || clientSupabase;
-        
-        const { error } = await supabase.from('soal').delete().eq('id', id);
-        if (error) {
-            alert("Gagal menghapus data: " + error.message);
-        } else { 
-            alert("Soal berhasil dihapus!"); 
-            bukaFormKelolaAplikasi(); 
-        }
-    } catch (err) {
-        alert("Koneksi ke server gagal: " + err.message);
-    }
-};
-
 
     ambilSemuaPertemuan();
 });
