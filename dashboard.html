@@ -447,18 +447,20 @@ const tbody = document.querySelector("#tabelManajemenSoal tbody");
 if (!semuaSoal || semuaSoal.length === 0) {
     tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#94a3b8;">Belum ada data soal di server database cloud.</td></tr>`;
 } else {
+    // 1. Simpan data database ke jendela global agar bisa diakses kapan saja
+    window.kumpulanSoalLokal = semuaSoal; 
+
     semuaSoal.forEach(soal => {
         const tr = document.createElement('tr');
-        // Mengamankan karakter kutip agar struktur string JSON tidak pecah
-        const soalAman = JSON.stringify(soal).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         
+        // Solusi: Kita HANYA mengirimkan soal.id (angka) ke dalam fungsi tombol, BUKAN teks soalnya.
         tr.innerHTML = `
-            <td style="font-weight:600; color:#334155;">${soal.pertanyaan}</td>
-            <td><span style="background:#e2e8f0; color:#475569; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600;">${soal.jenis_soal.replace('_',' ')}</span></td>
-            <td><div style="display:flex; gap:6px;">
-                <button onclick="isiDataFormEdit('${soalAman}')" style="padding:5px 10px; background:#3b82f6; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">Edit</button>
-                <button onclick="hapusSoalCloud(${soal.id})" style="padding:5px 10px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">Hapus</button>
-            </div></td>
+        <td style="font-weight:600; color:#334155;">${soal.pertanyaan}</td>
+        <td><span style="background:#e2e8f0; color:#475569; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600;">${soal.jenis_soal.replace('_',' ')}</span></td>
+        <td><div style="display:flex; gap:6px;">
+            <button onclick="bukaEditSesuaiID(${soal.id})" style="padding:5px 10px; background:#3b82f6; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">Edit</button>
+            <button onclick="hapusSoalCloud(${soal.id})" style="padding:5px 10px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">Hapus</button>
+        </div></td>
         `;
         tbody.appendChild(tr);
     });
@@ -578,6 +580,44 @@ window.isiDataFormEdit = function(soalString) {
 
     ambilSemuaPertemuan();
 });
+window.bukaEditSesuaiID = function(idSoal) {
+    // Cari data soal utuh dari memori berdasarkan ID angka
+    const soalDitemukan = window.kumpulanSoalLokal.find(s => s.id === idSoal);
+    
+    if (!soalDitemukan) {
+        alert("Data soal tidak ditemukan!");
+        return;
+    }
+
+    // Masukkan data langsung ke elemen form tanpa lewat string HTML pembungkus
+    document.getElementById('editSoalId').value = soalDitemukan.id;
+    document.getElementById('selectPertemuan').value = soalDitemukan.pertemuan_id;
+    document.getElementById('selectJenisSoal').value = soalDitemukan.jenis_soal;
+    
+    // Trigger perubahan jenis form
+    document.getElementById('selectJenisSoal').dispatchEvent(new Event('change'));
+    
+    // Teks soal berisi simbol % dan kode program aman masuk ke textarea
+    document.getElementById('inputPertanyaan').value = soalDitemukan.pertanyaan;
+
+    setTimeout(() => {
+        if (soalDitemukan.jenis_soal === 'pilihan_ganda' && Array.isArray(soalDitemukan.pilihan_jawaban)) {
+            if(document.getElementById('opsiA')) document.getElementById('opsiA').value = soalDitemukan.pilihan_jawaban[0] || '';
+            if(document.getElementById('opsiB')) document.getElementById('opsiB').value = soalDitemukan.pilihan_jawaban[1] || '';
+            if(document.getElementById('opsiC')) document.getElementById('opsiC').value = soalDitemukan.pilihan_jawaban[2] || '';
+            if(document.getElementById('opsiD')) document.getElementById('opsiD').value = soalDitemukan.pilihan_jawaban[3] || '';
+            if(document.getElementById('opsiE')) document.getElementById('opsiE').value = soalDitemukan.pilihan_jawaban[4] || '';
+        }
+        if(document.getElementById('kunciJawaban')) {
+            document.getElementById('kunciJawaban').value = soalDitemukan.kunci_jawaban;
+        }
+    }, 50);
+
+    document.getElementById('btnSimpanForm').innerText = "Update & Simpan Perubahan";
+    document.getElementById('formTambahSoal').scrollIntoView({ behavior: 'smooth' });
+};
+
+
 </script>
 </body>
 </html>
