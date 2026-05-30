@@ -261,7 +261,7 @@ td { padding: 10px; border: 1px solid #e2e8f0; color: #334155; }
                     <th style="padding: 14px; color: #475569; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Nama Siswa</th>
                     <th style="padding: 14px; color: #475569; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Kelas</th>
                     <th style="padding: 14px; color: #475569; font-weight: 700; border-bottom: 2px solid #e2e8f0;">Materi</th>
-                    <th style="padding: 14px; color: #475569; font-weight: 700; border-bottom: 2px solid #e2e8f0; text-align: center;">Skor</th>
+                    <th style="padding: 14px; color: #475569; font-weight: 700; border-bottom: 2px solid #e2e8f0; text-align: center;">Nilai</th>
                 </tr>
             </thead>
             <tbody id="tabelAktivitasTerbaru">
@@ -355,7 +355,7 @@ async function muatStatistikDashbor() {
         // 4. Ambil 5 Data Aktivitas Siswa Terbaru
         const { data: aktivitas } = await clientSupabase
             .from('riwayat_nilai')
-            .select('nama_siswa, kelas, pertemuan, total_soal')
+            .select('nama_siswa, kelas, pertemuan, skor')
             .order('id', { ascending: false })
             .limit(5);
 
@@ -378,7 +378,7 @@ async function muatStatistikDashbor() {
                     <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#334155; font-weight:500;">${r.nama_siswa || '-'}</td>
                     <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#64748b;">${r.kelas || '-'}</td>
                     <td style="padding:14px; border-bottom:1px solid #e2e8f0; color:#64748b;">Pertemuan ${r.pertemuan || '-'}</td>
-                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; text-align:center;"><span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:600; font-size:12px;">${r.total_soal || 0} Benar</span></td>
+                    <td style="padding:14px; border-bottom:1px solid #e2e8f0; text-align:center;"><span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-weight:600; font-size:12px;">${r.skor || 0} </span></td>
                 `;
                 tbody.appendChild(tr);
             });

@@ -43,7 +43,7 @@
     </div>
     <h2>Aplikasi Latihan Soal</h2>
     <p>Silakan pilih hak akses masuk di bawah ini</p>
-
+    
     <div class="choice-box">
         <!-- 1. TOMBOL AKSES SISWA -->
         <div onclick="bukaModalSiswa()" class="portal-btn">
@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const SUPABASE_ANON_KEY = "sb_publishable_AjyOuS5KjBLsSNLSSVSGvA_Ig0ogX93"; 
     const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    
     // 1. Fungsi Buka & Tutup Modal diikat langsung ke scope global agar tombol onclick berfungsi
     window.bukaModalSiswa = function() {
         document.getElementById('modalMasukSiswa').style.display = 'flex';
@@ -211,7 +212,36 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Kesalahan sistem: " + err.message);
         }
     };
-}); // <--- PERBAIKAN: DISINI ADALAH PENUTUP UNTUK DOMCONTENTLOADED YANG TADI HILANG
+
+
+    const btnAdmin = document.getElementById('btnAksesAdmin');
+    if (btnAdmin) {
+        btnAdmin.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const inputPin = prompt("Masukkan PIN Pengaman Aplikasi:");
+            if (!inputPin) return;
+            try {
+                const { data: hasilCek, error } = await clientSupabase
+                    .from('konfirmasi_keamanan')
+                    .select('pin_admin')
+                    .eq('id', 1);
+                
+                if (error) {
+                    alert("Koneksi gagal: " + error.message);
+                    return;
+                }
+                if (hasilCek && hasilCek.length > 0 && String(hasilCek[0].pin_admin).trim() === String(inputPin).trim()) {
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Kunci Salah! Akses ditolak.");
+                }
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        });
+    }
+});
 </script>
 </body>
 </html>
+
