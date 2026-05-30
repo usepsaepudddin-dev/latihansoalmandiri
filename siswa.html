@@ -312,6 +312,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 4. MEMUAT DETAIL SOAL LATIHAN
     async function muatDetailSoalDanHeader(pertemuanId, judulPertemuan) {
+    if (typeof window.aktifkanSanksiAntiCurang === 'function') {
+        window.aktifkanSanksiAntiCurang();
+    }
         document.getElementById('mapel').innerText = "4 Pilar dan Informatika";
         
         const dynamicContent = document.getElementById('dynamicContent');
