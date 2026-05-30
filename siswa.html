@@ -100,32 +100,49 @@ html, body {
 
 /* 5. OTOMATIS RESPONSIF SAAT DI LAPTOP (Layar > 1024px) */
 @media screen and (min-width: 1024px) {
-    body { 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        padding: 20px; 
-    }
-    .app-container { 
-        width: 100% !important; 
-        max-width: 1240px; 
-        height: 88vh; 
-        border-radius: 24px; 
-        /* KODE YANG DIUBAH: Mengizinkan scroll ke bawah khusus di laptop */
-        overflow-y: auto !important; 
-        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); 
-        border: 1px solid #e2e8f0;
-    }
-    .main-content { 
-        width: auto !important;
-        flex: 1 !important; 
-    }
+  html, body {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: auto !important; /* Otomatis scroll di tingkat browser utama */
+  }
+
+  body { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    padding: 20px; 
+  }
+
+  .app-container { 
+    width: 100% !important; 
+    max-width: 1240px; 
+    height: auto !important; /* Membuat wadah otomatis memanjang ke bawah mengikuti form */
+    min-height: 88vh; 
+    border-radius: 24px; 
+    overflow: visible !important; /* Mencegah konten dalam container terpotong */
+    box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); 
+    border: 1px solid #e2e8f0;
+  }
+
+  .main-content { 
+    width: auto !important;
+    flex: 1 !important;
+    height: auto !important; /* Otomatis mengikuti konten formulir */
+  }
+
+  .content-body {
+    height: auto !important;
+    min-height: calc(100% - 80px);
+  }
+
+  /* MEMBUKA KUNCI SCROLL PADA KOTAK TEMPAT FORMULIR */
+  .inner-box {
+    height: auto !important; /* Menghilangkan batas tinggi kaku agar tidak macet di laptop */
+    overflow: visible !important; 
+  }
 }
 
 </style>
-
-    
-    </style>
 </head>
 <body>
     <div class="modal-overlay" id="identitasModal">
